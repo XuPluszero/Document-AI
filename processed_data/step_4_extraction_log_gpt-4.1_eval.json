@@ -1,0 +1,66 @@
+[
+    {
+        "doc_name": "adventis",
+        "line_item_name": "Premium",
+        "response": {
+            "id": "chatcmpl-CFrNRDlM3pxpK6M46aePi9XMOggkI",
+            "choices": [
+                {
+                    "finish_reason": "tool_calls",
+                    "index": 0,
+                    "logprobs": null,
+                    "message": {
+                        "content": null,
+                        "refusal": null,
+                        "role": "assistant",
+                        "annotations": [],
+                        "audio": null,
+                        "function_call": null,
+                        "tool_calls": [
+                            {
+                                "id": "call_2KCjVXZk77fJoNxDkYo25EuA",
+                                "function": {
+                                    "arguments": "{\"think\":\"1. The extraction instruction asks for the policy premium, specifically the basic premium amount, excluding any itemized charges if present.\\n2. In the POLICY DOCUMENT, the premium is mentioned multiple times:\\n   - In section adventis.pdf000, under PREMIUM: \\\"USD 650,000.00 (for 100%) annual\\\"\\n   - In the Declarations, under 6 GROSS PREMIUM: \\\"USD 650,000.00 (for 100%) annual\\\"\\n3. There is no evidence of any itemized charges or additional fees included in the premium. The document also states under FEES PAYABLE TO INSURERS: None, and under DISCOUNT(S) PAYABLE TO THE POLICYHOLDER: None.\\n4. No endorsements or clauses are found that modify the premium amount.\\n5. The POLICY METADATA confirms the premium as 650,000.00 USD.\\n6. Therefore, the basic policy premium is USD 650,000.00, with no additional itemized charges or modifications.\",\"extraction\":{\"type\":\"LIMIT\",\"limit\":{\"amount\":{\"currencyCode\":\"USD\",\"units\":650000,\"nanos\":0}}}}",
+                                    "name": "extract"
+                                },
+                                "type": "function"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "created": 1757896137,
+            "model": "gpt-4.1-2025-04-14",
+            "object": "chat.completion",
+            "service_tier": "default",
+            "system_fingerprint": "fp_daf5fcc80a",
+            "usage": {
+                "completion_tokens": 249,
+                "prompt_tokens": 8716,
+                "total_tokens": 8965,
+                "completion_tokens_details": {
+                    "accepted_prediction_tokens": 0,
+                    "audio_tokens": 0,
+                    "reasoning_tokens": 0,
+                    "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                    "audio_tokens": 0,
+                    "cached_tokens": 0
+                }
+            }
+        },
+        "ground_truth": {
+            "limit": {
+                "amount": {
+                    "currencyCode": "USD",
+                    "nanos": 0,
+                    "units": 650000
+                }
+            },
+            "type": "LIMIT"
+        },
+        "is_correct": true,
+        "wrong_prediction_type": null
+    }
+]
