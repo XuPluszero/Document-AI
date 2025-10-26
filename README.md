@@ -1,7 +1,8 @@
 Document AI
+#No Raw Data are showned due to confidential reason
 ====
 
-Analyze insurance policy documents with LLMs and extract structured information.
+Analyze insurance policy documents with LLMs and extract structured information. 
 
 ## Overview
 This repository provides an end-to-end pipeline to:
