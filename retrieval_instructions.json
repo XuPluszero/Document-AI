@@ -1,0 +1,2136 @@
+[
+    {
+        "Line item name": "Premium",
+        "Line item instruction": "Find section contains policy premium.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "LIMIT"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "limit"
+            ]
+        }
+    },
+    {
+        "Line item name": "Aggregate limit",
+        "Line item instruction": "Find section contains policy aggregate limit.",
+        "Line item schema": {
+            "type": "object",
+            "required": [
+                "currencyCode",
+                "units",
+                "nanos"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "currencyCode": {
+                    "type": "string",
+                    "description": "The currency code for the amount",
+                    "enum": [
+                        "USD"
+                    ]
+                },
+                "units": {
+                    "type": "integer",
+                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                },
+                "nanos": {
+                    "type": "integer",
+                    "description": "The fractional amount in billionths (for cents representation)"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Retention",
+        "Line item instruction": "Find section contains retention amount for policy coverages.",
+        "Line item schema": {
+            "type": "object",
+            "required": [
+                "currencyCode",
+                "units",
+                "nanos"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "currencyCode": {
+                    "type": "string",
+                    "description": "The currency code for the amount",
+                    "enum": [
+                        "USD"
+                    ]
+                },
+                "units": {
+                    "type": "integer",
+                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                },
+                "nanos": {
+                    "type": "integer",
+                    "description": "The fractional amount in billionths (for cents representation)"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Coverage trigger",
+        "Line item instruction": "Find section contains\n- content about claims made\n- content about reporting a claim\n- claim reporting period",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "CLAIMS_MADE_AND_REPORTED",
+                "CLAIMS_MADE",
+                "OCCURRENCE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Shared limit",
+        "Line item instruction": "Find sections about \n1. Technology Errors and Omissions (also knowns as E&O or Professional Liability) insurance\n2. Policy aggregate limit ",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "SHARED_WITH_E_AND_O"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Subject to audit",
+        "Line item instruction": "Find sections about policy premium audit.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "YES",
+                "NO"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Retro Date",
+        "Line item instruction": "Find section contains retroactive date.",
+        "Line item schema": {
+            "type": "string",
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Coverage territory",
+        "Line item instruction": "Find section mentions\n- geographic territory \n- worldwide or continent or countries\n- foreign regulations like GDPR, etc.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "DOMESTIC",
+                "FOREIGN",
+                "SPECIFIED_TERRITORIES",
+                "WORLDWIDE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Treatment of Defense",
+        "Line item instruction": "Find section that mentions defense costs or claim expenses reduce the policy limit.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "INSIDE",
+                "OUTSIDE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Cybercrime Funds Transfer Fraud Instruction Limit",
+        "Line item instruction": "Find sections about coverage and losses corresponding to fraudulent electronic funds transfer instructions to a financial institution.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deductible": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Privacy Breach Expenses First Party",
+        "Line item instruction": "Find section says the policy covers privacy breach expense.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ]
+                },
+                "includedType": {
+                    "type": "string",
+                    "enum": [
+                        "LIMIT",
+                        "NUMBER_OF_INDIVIDUALS"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                },
+                "numberOfIndividuals": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Ransomware Cyber Extortion First Party Limit",
+        "Line item instruction": "Find sections about coverages and losses corresponding to negotiation or payments in response to an extortion event.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "coinsurancePercentage": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Network Security and Privacy Third Party Limit",
+        "Line item instruction": "Find section contains\n- coverage for network security breach\n- coverage for privacy breach or violation\n- coverage limit for network security or privacy liability",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Privacy Regulatory Defense Awards and Fines Limit",
+        "Line item instruction": "Find section says \n- the policy covers cost of regulatory investigations\n- the policy covers cost of regulatory fines and penalties",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "PCI DSS Assessment And Expense Limit",
+        "Line item instruction": "Find section that says the policy covers payment card data security violations, also known as PCI DSS.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Data Breach Response Crisis Management Limit",
+        "Line item instruction": "Find sections about data breach incident response and crisis management.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Data Restoration Recovery First Party Limit",
+        "Line item instruction": "Find sections about data restoration.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Computer Replacement Bricking First Party Limit",
+        "Line item instruction": "Find sections about computer hardware replacement due to bricking.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cyber Terrorism First Party Limit",
+        "Line item instruction": "Find section related to cyber terrorism.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Business Interruption And Extra Expense First Party Limit",
+        "Line item instruction": "Find sections related to\n- business interruption\n- extra expense\n- waiting period\n- indemnity period\n- period of restoration",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "System Failure First Party Limit",
+        "Line item instruction": "Find sections related to\n- business interruption\n- IT / computer system failure\n- waiting period\n- indemnity period\n- period of restoration",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent Business Interruption Of IT Provider First Party Limit",
+        "Line item instruction": "Find section contains\n- content about vendor, supplier, or third party provider\n- content about business interruption\n- content about time period\n\nYou should also pay special attention to\n- period of restoration\n- waiting period\n- period of indemnity\n- period of interruption",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent Business Interruption Of Non IT Provider First Party Limit",
+        "Line item instruction": "Find section contains\n- content about vendor, supplier, or third party provider\n- content about Non-IT\n- content about business interruption\n- content about time period\n\nYou should also pay special attention to\n- period of restoration\n- waiting period\n- period of indemnity\n- period of interruption",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent System Failure Of IT Provider First Party Limit",
+        "Line item instruction": "Find section contains\n- content about vendor, supplier, or third party provider\n- content about system failure or unplanned system down\n- content about business interruption\n- content about time period\n\nYou should also pay special attention to\n- period of restoration\n- waiting period\n- period of indemnity\n- period of interruption",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent System Failure Of Non IT Provider First Party Limit",
+        "Line item instruction": "Find section contains\n- content about vendor, supplier, or third party provider\n- content about system failure or unplanned system down\n- content about Non-IT\n- content about business interruption\n- content about time period\n\nYou should also pay special attention to\n- period of restoration\n- waiting period\n- period of indemnity\n- period of interruption",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Reputational Harm Loss First Party Limit",
+        "Line item instruction": "Find sections related to\n- reputation harm\n- waiting period\n- indemnity period\n- period of restoration",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Criminal Rewards Limit",
+        "Line item instruction": "Find sections related to rewards or bounties paid to informant to obtain information that leads to the arrest of cyber criminals.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Computer Fraud Limit",
+        "Line item instruction": "Find sections related to computer fraud.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Utility Fraud Limit",
+        "Line item instruction": "Find anyting related to \n- services fraud and losses\n- utility fraud and losses\n- the insured pay for services they never received",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Telephone Fraud Limit",
+        "Line item instruction": "Find sections related to telephone systems fraud.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Cryptojack Fraud Limit",
+        "Line item instruction": "Find sections related to fraud involving mining cryptocurrency.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Impersonation Fraud Phishing And Social Engineering Limit",
+        "Line item instruction": "Find sections related to deception fraud or social engineering fraud involving impersonating employee, vendor or customer.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Invoice Fraud Manipulation Limit",
+        "Line item instruction": "Find sections related to invoice fraud, forged invoice.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Supplemental Expenses Forensic Accounting Limit",
+        "Line item instruction": "Find sections related to forensic expenses and extra expenses.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Loss Mitigation Expense Limit",
+        "Line item instruction": "Find section contains\n- content about mitigate or prevent a potential loss \n- pre-claim expenses\n- event response",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Court Appearance Limit",
+        "Line item instruction": "Find anyting related to \n- attendence of legal defense, hearings, proceedings, etc.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Betterment Expenses After Attack Limit",
+        "Line item instruction": "Find sections related to upgrading the computer systems after cyber attack, also known as betterment expenses.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Broadened definition of services on the declaration page",
+        "Line item instruction": "Find endorsement sections that adding more services or coverages. Also find the declaration section.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Additional Insured Automatic Status When Required In Written Contract Or Agreement",
+        "Line item instruction": "Find sections related to additional insured.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "N/A"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Bodily injury",
+        "Line item instruction": "Find sections related to bodily injury.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Choice of counsel",
+        "Line item instruction": "Find sections related to \n- defend claim\n- choice of legal counsel\n- a list of legal counsels",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "PANEL"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Choice of incident responders",
+        "Line item instruction": "Find sections related to \n- choice of incident responders or vendors\n- pre approved panel list\n- designated vendor\n- response team",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "PANEL"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cost of corrections in media coverage",
+        "Line item instruction": "Find sections related to correcting or retracting media content.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Coverage for sub-poenas and injunctions in media coverage",
+        "Line item instruction": "Find sections related to \n- media coverage\n- sub-poenas or injunctions",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Include wages for overtime",
+        "Line item instruction": "Find sections related to \n- wages\n- employee costs\n- overtime wages or costs.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Mental anguish",
+        "Line item instruction": "Find sections related to bodily injury and mental anguish.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Terrorism Risk Insurance Act (TRIA)",
+        "Line item instruction": "Find sections related to terrorism risk insurance act.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "INCLUDED",
+                        "REJECTED"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Duty to defend",
+        "Line item instruction": "Find sections related to legal defense.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "dutyToDefend": {
+                    "type": "string",
+                    "enum": [
+                        "DUTY_TO_DEFEND",
+                        "DUTY_TO_INDEMNIFY"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Acquisition threshold",
+        "Line item instruction": "Find sections related to subsidiary acquisition.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "acquisitionThreshold": {
+                    "type": "string",
+                    "enum": [
+                        "AUTOMATIC_COVERAGE",
+                        "THRESHOLD",
+                        "PREDETERMINED_RATES"
+                    ]
+                },
+                "thresholdPercentage": {
+                    "type": "string"
+                },
+                "predeterminedRates": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Broad form named insurance",
+        "Line item instruction": "Find sections related to the definition of \"the insured\" and subsidiary.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "isoForm": {
+                    "type": "string",
+                    "enum": [
+                        "CARRIER_FORM"
+                    ]
+                },
+                "appliesTo": {
+                    "type": "string",
+                    "enum": [
+                        "ANY_NAMED_INSURED",
+                        "OTHER"
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Claim reporting window extended",
+        "Line item instruction": "Find section contains\n- claim reporting\n- notice of claim",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "numberOfDays": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Media liability coverage - 3rd party limit",
+        "Line item instruction": "Find sections related to the media liability and media wrongful incident.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "coverage": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Notice of Cancellation",
+        "Line item instruction": "Find sections related to policy cancellation.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "applies": {
+                    "type": "string",
+                    "enum": [
+                        "THIRTY_DAYS",
+                        "SIXTY_DAYS",
+                        "NINETY_DAYS",
+                        "OTHER"
+                    ]
+                },
+                "other": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Notice of Cancellation to Third Party / Certificate Holder",
+        "Line item instruction": "Find sections related to policy cancellation and notification.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "appliesTo": {
+                    "type": "string",
+                    "enum": [
+                        "ENTITY_YOU_HAVE_A_CONTRACT_WITH",
+                        "WHERE_REQUIRED_BY_WRITTEN_CONTRACT"
+                    ]
+                },
+                "entityContractName": {
+                    "type": "string"
+                },
+                "entityContractAddress": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Softened cooperation hammer clause",
+        "Line item instruction": "Find sections related to claim settlement, and percentage of excessive cost that the insurer would cover.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "clause": {
+                    "type": "string",
+                    "enum": [
+                        "EIGHTY_TWENTY",
+                        "OTHER"
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+]

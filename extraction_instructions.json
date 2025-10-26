@@ -1,0 +1,2165 @@
+[
+    {
+        "Line item name": "Premium",
+        "Line item instruction": "Extract Policy premium. If the total premium is composed of policy premium and other itemized charge, ONLY extract the basic premium amount.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "LIMIT"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "limit"
+            ]
+        }
+    },
+    {
+        "Line item name": "Aggregate limit",
+        "Line item instruction": "The total limit an insurer will pay in the policy period described in this policy document. There will always be an aggregate limit on a policy.",
+        "Line item schema": {
+            "type": "object",
+            "required": [
+                "currencyCode",
+                "units",
+                "nanos"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "currencyCode": {
+                    "type": "string",
+                    "description": "The currency code for the amount",
+                    "enum": [
+                        "USD"
+                    ]
+                },
+                "units": {
+                    "type": "integer",
+                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                },
+                "nanos": {
+                    "type": "integer",
+                    "description": "The fractional amount in billionths (for cents representation)"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Retention",
+        "Line item instruction": "[Retention]\nDefinition:\nThe amount the insured must pay before the insurance coverage applies.\n\nDecision Rules:\n- If there is retention amount for Network Security Liability in the policy, use that amount for this line item.\n- If there is no Network Security Liability, you need to apply the common retention amount instead.",
+        "Line item schema": {
+            "type": "object",
+            "required": [
+                "currencyCode",
+                "units",
+                "nanos"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "currencyCode": {
+                    "type": "string",
+                    "description": "The currency code for the amount",
+                    "enum": [
+                        "USD"
+                    ]
+                },
+                "units": {
+                    "type": "integer",
+                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                },
+                "nanos": {
+                    "type": "integer",
+                    "description": "The fractional amount in billionths (for cents representation)"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Coverage trigger",
+        "Line item instruction": "[Coverage trigger]\nDefinition:\nThis line item lists the requirements in order for the claim to become effective.\n\nDecision Rules:\nThere are 3 options to choose from:\n- CLAIMS_MADE_AND_REPORTED: this requires the claim both made AND reported during policy period (or extended reporting period)\n- CLAIMS_MADE: this only requires the claim made during policy period, no requirement on reporting timing\n- OCCURRENCE: this only requires the incident occurs during policy period, no requirement on claims made or reporting timing\n\nOutput Rules:\n- If no relevant information is found: Output null\n- Otherwise output your choice according to Decision Rules",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "CLAIMS_MADE_AND_REPORTED",
+                "CLAIMS_MADE",
+                "OCCURRENCE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Shared limit",
+        "Line item instruction": "[Shared limit]\nDefinition:\nWhether this policy contains E&O coverage AND the coverage limit is the same as the policy aggregate limit.\n\nDecision Rules:\nIn order to select SHARED_WITH_E_AND_O, the following two conditions must be met\n1. The policy needs to cover Technology Errors and Omissions (also knowns as E&O or Professional Liability) insurance, which covers financial losses that insured's client might suffer due to error or omissions in your technology professonal services.\n2. The E&O coverage limit needs to be the same as the policy aggregate limit.\n\nIf the conditions above are not met, output null.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "SHARED_WITH_E_AND_O"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Subject to audit",
+        "Line item instruction": "Decision Rules:\n- If the policy contains endorsement showing exactly when and how to compute the policy premium, output YES.\n- If there is no such endorsement, output NO.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "YES",
+                "NO"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Retro Date",
+        "Line item instruction": "[Retro Date]\nDefinition:\nRetroactive date.\n\nDecision Rules:\n- For retro dates that are \"N/A\", \"Not Applicable\", or Full Prior Acts, these values are equivalent to \"Full Prior Acts\". Please output \"Full Prior Acts\" in the final extraction.\n- If the policy specifies actual dates, output the exact date. \n- If there are multiple retroactive date in the policy, output the details of retro date, for example, which coverage has which retro date.",
+        "Line item schema": {
+            "type": "string",
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Coverage territory",
+        "Line item instruction": "[Coverage territory]\nDefinition:\nThis indicates where the insurance coverage applies geographically.\n\nDecision Rules:\n- DOMESTIC: Coverage applies only within the insured's home country where the policy was issued. \n- FOREIGN: Coverage applies only outside the insured's home country. This is less common for standard cyber policies but might be relevant for specialized international operations.\n- SPECIFIED_TERRITORIES: Coverage applies only to specific geographic regions or countries explicitly listed in the policy. \n- WORLDWIDE: Coverage applies globally, regardless of where the cyber incident occurs. If the policy does not mention worldwide explicitly, but mentions foreign regulations like GDPR, this still implies the policy is worldwide.\n- Note that if the policy excludes some specific territories but still covers domestic and foreign territories, output WORLDWIDE. You would only select \"specified territories\" when the policy coverage is restricted to a list of territories.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "DOMESTIC",
+                "FOREIGN",
+                "SPECIFIED_TERRITORIES",
+                "WORLDWIDE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Treatment of Defense",
+        "Line item instruction": "[Treatment of Defense]\nDefinition:\nWhether the defense costs or claim expenses is within and reduces the policy limits, or they are seperate and do not reduce limit.\n\nDecision Rules:\n- If the policy states defense costs or claim expenses shall reduce policy limits, output INSIDE. \n- If the policy states all the claim expenses are seperate and do not reduce limit, output OUTSIDE.",
+        "Line item schema": {
+            "type": "string",
+            "enum": [
+                "INSIDE",
+                "OUTSIDE"
+            ],
+            "additionalProperties": false
+        }
+    },
+    {
+        "Line item name": "Cybercrime Funds Transfer Fraud Instruction Limit",
+        "Line item instruction": "[Funds Transfer Instruction Fraud]\nDefinition:\nThis line item covers losses when a cybercriminal provides fraudulent electronic funds transfer instructions to a financial institution using confidential banking information.\n\nCoverage Requirements:\n- This line item requires involvement of a financial institution. \n\nNot Applicable:\n- This line item does not apply to situations where the bank itself is hacked, as those would fall under the bank's own insurance.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If the policy does not provide coverage for this line item: Output \"NOT_COVERED\"\n- If the line item is covered in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If the policy explicitly excludes this line item: Output \"EXCLUDED\"\n\nParameter Assignment:\n- subLimit: use the found coverage's limit to fill the subLimit parameter\n- deductible: use the coverage's retention amount to fill the deductible parameter.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deductible": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Privacy Breach Expenses First Party",
+        "Line item instruction": "[First Party Coverage for Privacy Breach Expenses]\nDefinition:\nThis line item covers the situation where the insured's privacy information was leaked and the insured incurs costs related to the breach.\n\nCoverage Requirements:\n- This is first party coverage, not liability.\n- This should cover privacy breach expenses, examples of breach expenses include legal fees, regulatory fines, notification expenses, forensic investigations, etc. \n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- includedType: the found coverage covers by limit or by number of individuals\n- limit: if the coverage covers by limit, fill the coverage limit here, otherwise leave it empty\n- numberOfIndividuals: if the coverage covers by number of individuals, fill the number here, otherwise leave it empty",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ]
+                },
+                "includedType": {
+                    "type": "string",
+                    "enum": [
+                        "LIMIT",
+                        "NUMBER_OF_INDIVIDUALS"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                },
+                "numberOfIndividuals": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Ransomware Cyber Extortion First Party Limit",
+        "Line item instruction": "This coverage item helps cover costs for negotiation or payments in response to an extortion event. An extortion event threatens a cyber attack.\n\nIf you can find a policy coverage that can fully cover this item, even this item is not a standalone coverage in the policy, you can use the coverage you found in the policy to fill out the parameters required for this item as long as this coverage can fully cover this item.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "coinsurancePercentage": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Network Security and Privacy Third Party Limit",
+        "Line item instruction": "This coverage item corresponds to the cost related to third-party damages due to\n1. Network security breaches (like data breaches, cyberattacks)\n2. Violations of privacy laws or breaches of non-disclosure agreements.\n\nIf you can find a policy coverage that can fully cover this item, even this item is not a standalone coverage in the policy, you can use the coverage you found in the policy to fill out the parameters required for this item as long as this coverage can fully cover this item. Note that the coverage limit do not add up.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Privacy Regulatory Defense Awards and Fines Limit",
+        "Line item instruction": "This coverage item corresponds to the costs of defending against regulatory investigations related to privacy breaches, as well as the acutal fines or penalties imposed by regulators, if legally insurable in the regulatory regimen.\n\nIf you can find a policy coverage that can fully cover this item, even this item is not a standalone coverage in the policy, you can use the coverage you found in the policy to fill out the parameters required for this item as long as this coverage can fully cover this item.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "PCI DSS Assessment And Expense Limit",
+        "Line item instruction": "This coverage item corresponds to covering the fine and penalty due to violations of Payment Card Industry Data Security Standard (PCI DSS).\n\nIf you can find a policy coverage that can fully cover this item, even this item is not a standalone coverage in the policy, you can use the coverage you found in the policy to fill out the parameters required for this item as long as this coverage can fully cover this item.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Data Breach Response Crisis Management Limit",
+        "Line item instruction": "[First Party Coverage for Data Breach Response and Crisis Management]\nDefinition:\nThis is a first-party coverage item that corresponds to the expenses incurred in responding to a data breach incident and crisis management.\n\nCoverage Requirements:\n- This is first party coverage, not liability.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- limit: use the found coverage's limit to fill this parameter. If there are multiple found coverages, ues the one with highest limit, do not add up limits.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Data Restoration Recovery First Party Limit",
+        "Line item instruction": "This is a first-party coverage item corresponds to the situation where the insured incurs costs to restore or rebuild data that is lost or corrupted.\n\nIf you can find a policy coverage that can fully cover this item, even this item is not a standalone coverage in the policy, you can use the coverage you found in the policy to fill out the parameters required for this item as long as this coverage can fully cover this item.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Computer Replacement Bricking First Party Limit",
+        "Line item instruction": "[Computer Replacement Bricking First Party]\nDefinition:\nThis line item pays for first-party losses to replace computer system bricked by a cyber incident.\n\nCoverage Requirements:\n- This is first-party coverage, not liability.\n- The computer system bricking cause includes cyber incident, or software malfunction, or unauthorized udpate.\n\nNot Applicable:\n- \"Betterment expense\" is the cost of upgrading systems, hence does not apply to this line item.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- limit: use the found coverage's limit to fill the limit parameter.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cyber Terrorism First Party Limit",
+        "Line item instruction": "[Cyber Terrorism First Party]\nDefinition:\nThis line item covers first-party losses due to cyber terrorism attacks.\n\nCoverage Requirements:\n- The policy must have an explicit cyber terrorism coverage with limit corresponds to this specific coverage.\n- Do not try to use policy's aggregate limit, and if you cannot find the specific coverage limit, it means it is not covered.\n\nNot Applicable:\n- Terrorism Risk Insurance Act (TRIA) does not apply to this line item.\n- If cyber terrorism is added back from war exclusion statement, this DOES NOT mean the policy has cyber terrorism coverage. We must have an explicit coverage for this line item.\n- Extortion is NOT cyber terrorism.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- limit: use the found coverage's limit to fill the limit parameter.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Business Interruption And Extra Expense First Party Limit",
+        "Line item instruction": "[First Party Coverage for Business Interruption]\nDefinition:\nThis line item covers for the insured's business interruption loss due to cyber incident (security failure).\n\nCoverage Requirements:\n- The loss should be first party business income loss due to the insured experienced cyber incident or security failure\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "System Failure First Party Limit",
+        "Line item instruction": "[First Party Coverage for System Failure]\nDefinition:\nThis line item covers for the insured's business interruption loss due to unplanned system failure.\n\nCoverage Requirements:\n- The loss should be first party business income loss due to the insured's IT system experienced unplanned system failure or unscheduled system down\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent Business Interruption Of IT Provider First Party Limit",
+        "Line item instruction": "[First Party Coverage for Contingent Dependent Business Interruption Of IT Provider]\nDefinition:\nThis line item covers for the insured's business interruption loss due to their IT provider experienced cyber incident (security failure).\n\nCoverage Requirements:\n- The loss should be first party business loss due to the incident\n- The incident should be cyber incident or security failure\n- Who is the IT provider: If the insured's computer system is operated by a third party vendor, it is considered IT provider. If the policy provides supplier coverage, by default it includes both IT and non-IT providers, unless the language is specific to IT supplier or non-IT supplier.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent Business Interruption Of Non IT Provider First Party Limit",
+        "Line item instruction": "[First Party Coverage for Contingent Dependent Business Interruption Of Non IT Provider]\nDefinition:\nThis line item covers for the insured's business interruption loss due to their Non IT provider experienced cyber incident (security failure).\n\nCoverage Requirements:\n- The loss should be first party business loss due to the incident\n- The incident should be cyber incident or security failure\n- The incident should occur in the insured's Non-IT provider / supplier.\n- If the policy covers supplier broadly, by default it covers both IT supplier and Non-IT supplier.\n- If the policy only covers IT supplier and no coverage for Non-IT supplier, then this item is not covered.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent System Failure Of IT Provider First Party Limit",
+        "Line item instruction": "[First Party Coverage for Contingent Dependent System Failure Of IT Provider]\nDefinition:\nThis line item covers for the insured's business interruption loss due to their IT provider experienced unplaned system failure.\n\nCoverage Requirements:\n- The loss should be first party business loss due to the incident\n- The incident should be unplanned system failure or unscheduled system down\n- Who is the IT provider: If the insured's computer system is operated by a third party vendor, it is considered IT provider. If the policy provides supplier coverage, by default it includes both IT and non-IT providers, unless the language is specific to IT supplier or non-IT supplier.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Contingent Dependent System Failure Of Non IT Provider First Party Limit",
+        "Line item instruction": "[First Party Coverage for Contingent Dependent System Failure Of Non IT Provider]\nDefinition:\nThis line item covers for the insured's business interruption loss due to their Non IT provider experienced unplaned system failure.\n\nCoverage Requirements:\n- The loss should be first party business loss due to the incident\n- The incident should be unplanned system failure or unscheduled system down of the Non-IT provider / supplier\n- Note that Non-IT provider can also have their own computer systems and can have system failure.\n- If the policy covers supplier broadly, by default it covers both IT supplier and Non-IT supplier.\n- If the policy only covers IT supplier and no coverage for Non-IT supplier, then this item is not covered.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period corresponds to business interruption loss.\n- Indemnity period: you should find the indemnity period corresponds to business interruption loss.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Reputational Harm Loss First Party Limit",
+        "Line item instruction": "[First Party Coverage for Reputational Harm Loss]\nDefinition:\nThis line item covers for the insured's reputational harm losses.\n\nCoverage Requirements:\n- Reputational harm loss should be business income losses due to the company's reputation being harmed\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\nOnly fill the parameters when this line item is INCLUDED.\n- Limit: use the found coverage's limit to fill the limit parameter\n- Waiting period: you should find the waiting period that applies to repuational harm loss. Note that if the waiting period is specific for a different coverage, you cannot use it here.\n- Indemnity period: you should find the indemnity period that applies to reputational harm loss. Note that if the indemnity period is specific for a different coverage, you cannot use it here.\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "waitingPeriod": {
+                    "type": "integer"
+                },
+                "waitingPeriodType": {
+                    "type": "string",
+                    "enum": [
+                        "HOURS",
+                        "DAYS"
+                    ]
+                },
+                "indemnityPeriodDays": {
+                    "type": "integer",
+                    "description": "The indemnity period (number of days)"
+                },
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Criminal Rewards Limit",
+        "Line item instruction": "This coverage item helps cover rewards or bounties offered by the insured company to obtain information that leads to the arrest and conviction of individuals who committed crimes against the company's computer system or data.\nNote that you do not have to find a seperate sublimit for this item. If you can find a policy coverage that can cover this item, use the corresponding coverage's limit to fill the subLimit parameter.\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\".\nIf the policy explicitly exclude this coverage item, then output \"excluded\".",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Computer Fraud Limit",
+        "Line item instruction": "[Cybercrime Computer Fraud]\nCoverage Requirements:\n- Covers First-party losses due to hacking into the insured's computer system and moving money.\n- This should be first party coverage, not liability.\n\nNot Applicable:\n- Losses when a cybercriminal provides fraudulent electronic funds transfer instructions to a financial institution is a different coverage item, and is not \"computer fraud\" \n- cyber extortion is not \"computer fraud\"\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- use the found coverage's limit to fill the sublimit parameter",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Utility Fraud Limit",
+        "Line item instruction": "[Cybercrime Utility Fraud]\nCoverage Requirements:\n- Covers losses when the insured pays for utility/vendor services never received due to fraud or unauthorized manipulation, OR\n- Combined coverage covering both cryptojacking AND telecom fraud\n\nNot Applicable:\n- Cryptojacking-only coverage (separate line item - does not satisfy this requirement)\n- Telecom-only coverage (separate line item - does not satisfy this requirement)\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- use the found coverage's limit to fill the sublimit parameter",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Telephone Fraud Limit",
+        "Line item instruction": "This coverage item covers losses resulting from unauthorized access to and use of the insured's telephone systems.\nNote that you do not have to find a seperate sublimit for this item. If you can find a policy coverage that can fully cover this item, use the corresponding coverage's limit to fill the Sublimit parameter.\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\".\nIf the policy explicitly exclude this coverage item, then output \"excluded\".",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Cryptojack Fraud Limit",
+        "Line item instruction": "This coverage item pays for losses resulted from unauthorized use of the insured's computing resources to mine cryptocurrency.\nNote that you do not have to find a seperate sublimit for this item. If you can find a policy coverage that can fully cover this item, use the corresponding coverage's limit to fill the Sublimit parameter.\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\".\nIf the policy explicitly exclude this coverage item, then output \"excluded\".",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Impersonation Fraud Phishing And Social Engineering Limit",
+        "Line item instruction": "This coverage item pays losses resulting from the insured being deceived by a cybercriminal who impersonates an employee, vendor, or customer. This coverage applies when the impersonaiton involves deceptive social engineering tactics or other fraudulent manipulation rather than techinical hacking of systems.\nNote that you do not have to find a seperate sublimit for this item. If you can find a policy coverage that can fully cover this item, use the corresponding coverage's limit to fill the Sublimit parameter.\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\".\nIf the policy explicitly exclude this coverage item, then output \"excluded\".",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cybercrime Invoice Fraud Manipulation Limit",
+        "Line item instruction": "This coverage item pays for the insured's loss in the situation where a customer refuses to pay the insured's invoice because the customer mistakenly paid a cybercriminal / forged invoice instead. \nNote that you do not have to find a seperate sublimit for this item. If you can find a policy coverage that can fully cover this item, use the corresponding coverage's limit to fill the Sublimit parameter.\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\".\nIf the policy explicitly exclude this coverage item, then output \"excluded\".",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Supplemental Expenses Forensic Accounting Limit",
+        "Line item instruction": "[Forensic Accounting Supplemental Expenses]\nDefinition:\nThis line item covers forensic expenses.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- subLimit: use the found coverage's limit to fill the subLimit parameter.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Loss Mitigation Expense Limit",
+        "Line item instruction": "[Loss Mitigation Expense]\nCoverage Requirements:\n- For a potential claim, before the claim is made, the insurer offers to cover the costs to prevent, reduce, or minimize potential cyber losses due to the incident.\n- Post claim expenses do not apply here.\n\nOutput Rules:\nFirst find the coverage in the policy that fulfills all the requirements of this line item.\n- If no relevant coverage is found: Output \"NOT_COVERED\"\n- If the coverage is found and is included in the policy: Output INCLUDED and fill the required parameters according to Parameter Assignment\n- If this coverage is found and is explicitly excluded: Output \"EXCLUDED\"\n\nParameter Assignment:\n- subLimit: use the found coverage's limit to fill the subLimit parameter",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Court Appearance Limit",
+        "Line item instruction": "This item covers loss of earnings or wages when the insured needs to take time off for attendance of legal defense, hearings, proceedings, etc.\nFor the Sublimit parameter:\n- If the policy provides both a per-day limit AND an aggregate limit, use the aggregate amount\n- If the policy provides only a per-day limit (without any aggregate limit), use the per-day amount as the sublimit\n- If the policy provides only an aggregate limit (without specifying per-day), use the aggregate amount\n\nIf there is no evidence that shows this item is covered in the policy, output \"NOT_COVERED\"\nIf the policy explicitly excludes this coverage item, output 'EXCLUDED'",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Betterment Expenses After Attack Limit",
+        "Line item instruction": "[Betterment Expenses After Attack]\nDefinition:\nThis line item covers the additional expenses incurred to upgrade or improve computer systems beyond their pre-attack state, following a cyber incident.\n\nDecision Rules:\n- First find terms about UPGRADING computer systems or softwares. Replacement expense is not considered betterment expense.\n- If the cost of upgrading is not more than the original cost, this is NOT betterment expense.\n- If the upgrades are not computer systems related, for example, improving process, products, they are NOT betterment expenses.\n- Find and write down all the coverages in the policy that offers some type of betterment expenses coverage.\n- If you find multiple coverages, write down which coverage provides the highest limit. Then output \"INCLUDED\" and fill the parameters according to Parameter Assignment.\n- If no such coverage is found, try to find policy terms that exclude betterment expense. If there are exclusions, output \"EXCLUDED\"\n- If no exclusion found, output \"NOT_COVERED\".\n\nParameter Assignment:\n- use the found coverage with highest limit to fill the subLimit parameter.\n- However, If the betterment expense is restricted to X% of the original hardware cost, this line item is still included, but leave the subLimit parameter empty.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ],
+                    "type": "string"
+                },
+                "subLimit": {
+                    "type": "object",
+                    "required": [
+                        "amount"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "amount": {
+                            "type": "object",
+                            "required": [
+                                "currencyCode",
+                                "units",
+                                "nanos"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "currencyCode": {
+                                    "type": "string",
+                                    "description": "The currency code for the amount",
+                                    "enum": [
+                                        "USD"
+                                    ]
+                                },
+                                "units": {
+                                    "type": "integer",
+                                    "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                                },
+                                "nanos": {
+                                    "type": "integer",
+                                    "description": "The fractional amount in billionths (for cents representation)"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Broadened definition of services on the declaration page",
+        "Line item instruction": "Whether the definition of covered \"services\" is modified and increased in coverage. Note that Technology Services are standard coverage in Cyber policy and it does not broaden definition of services.\nIf there does not exist such definition increase, output null.\nIf there exisits such definition increase, output YES.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Additional Insured Automatic Status When Required In Written Contract Or Agreement",
+        "Line item instruction": "Parameter Assignment:\n- If the entities or persons who have entered into a written contract or agreement with the insured are considered additional insureds, output YES\n- If adding additional insured requires modifying the policy, output NO\n\nOutput Rules:\n- If there is no explicit evidence showing yes or no: Output null\n- Otherwise output according to \"Parameter Assignment\"",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "N/A"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Bodily injury",
+        "Line item instruction": "Whether the policy covers for claims involving physical injury to individuals. Usually bodily injury is explicitly excluded or included.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Choice of counsel",
+        "Line item instruction": "[Choice of counsel]\nDefinition:\nWhether the insured has their free choice of legal counsel for claim defense.\n\nDecision Rules:\n- If the policy suggests the insured has free choice of legal counsel, output \"YES\". Note that if the insured can choose their own counsel but with restrictions, this is NOT \"free choice\".\n- If the policy suggests the policy provides a list of counsels and allow the insured to choose from this list, output \"PANEL\"\n- If the policy suggests the insure appoints the legal counsel, and hence the insured does not have a choice, output \"NO\"\n- If there is no relevant information, output null.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "PANEL"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Choice of incident responders",
+        "Line item instruction": "[Choice of incident responders]\nDefinition:\nWhen responding to a cyber incident, the choice the insured have for incident responders.\n\nDecision Rules:\n- If the policy suggests the insured has free choice for vendor selection, output \"YES\". If the insured can choose their own vendor but the coverage limit is reduced, this is NOT \"free choice\".\n- If the policy suggests the insured is provided a list of vendors and can only choose from this list, output \"PANEL\"\n- If the policy suggests the insured is provided with designated vendor appointed by the insure, output \"NO\"\n- If there is no relevant information, output null.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO",
+                        "PANEL"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Cost of corrections in media coverage",
+        "Line item instruction": "[Cost of corrections]\nParameter Assignment:\n- If the policy explicitly states that it pays for costs of correcting or retracting wrongful content, output \"YES\"\n- If the policy explicitly excludes such costs, output \"NO\"\n- If there is no relevant content for this cost in the policy, leave it empty.\n\nOutput Rules:\n- If there is no relevant content for this cost: Output null\n- Otherwise output according to Parameter Assignment",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Coverage for sub-poenas and injunctions in media coverage",
+        "Line item instruction": "You need to choose one of the 3 cases:\nCase 1. If the policy pays for costs related to sub-poenas or injunctions for wrongful incidents, output YES. \nCase 2. If such costs are explicitly excluded, output NO. \nCase 3. If there is no evidence showing such cost is covered or excluded, output null.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Include wages for overtime",
+        "Line item instruction": "[Wages for overtime]\nDecision Rules:\nFirst list all evidence related to inclusion or exclusion of wages / salaries / overtime employee costs in the policy.\nSecond analyze the evidences and map to the 3 possible conclusions:\n1. If the policy pays for overtime wages/salaries, conclusion is YES. Note that only paying for normal wages does not mean paying for overtime wages. \n2. If the policy excludes wages/salaries, this means overtime wage is EXCLUDED as well, and conclusion is NO.\n3. If neither Case 1 or 2 applies, concusion is NA.\n\nOutput Rules:\n- If there is no evidence related to wage, or conclusion is Case 3 - NA: Output null\n- Otherwise fill the parameter according to Parameter Assignment.\n\nParameter Assignment:\nyesNo: if conclusion is Case 1, output YES. If conclusion is Case 2, output NO.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Mental anguish",
+        "Line item instruction": "If mental anguish is included in the policy, output YES. If mental anguish is excluded, output NO. You should also check for bodily injury exclusions, becasue sometimes even bodily injury is excluded but if the policy states mental anguish is added back, it also means YES.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Terrorism Risk Insurance Act (TRIA)",
+        "Line item instruction": "If the policy includes Terrorism Risk Insurance Act, output INCLUDED. If the insured explicity reject TRIA, output REJECTED.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "yesNo": {
+                    "type": "string",
+                    "enum": [
+                        "INCLUDED",
+                        "REJECTED"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Duty to defend",
+        "Line item instruction": "This specifies the insurer's obligation regarding legal defense for the insured.\nWhen \"DUTY_TO_DEFEND\" is selected, the insurer has an obligation to provide and pay for legal defense on behalf of the insured when claims covered by the policy are made against them. The insurer will select and appoint legal counsel and manage the defense strategy.\nIf the alternative \"DUTY_TO_INDEMNIFY\" had been selected instead, the insurer would only be obligated to reimburse the insured for defense costs, but the insured would be responsible for arranging their own legal representation and managing their defense.\nThe DUTY_TO_DEFEND option generally provides broader protection for the insured as the insurance company takes on the responsibility of defending against claims, rather than just reimbursing costs.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "dutyToDefend": {
+                    "type": "string",
+                    "enum": [
+                        "DUTY_TO_DEFEND",
+                        "DUTY_TO_INDEMNIFY"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Acquisition threshold",
+        "Line item instruction": "Check how the policy handles the insured's newly acquired subsidiaries. There are three possible approaches:\n- AUTOMATIC_COVERAGE extends the insured's cyber policy coverage automatically to newly acquired entities without requiring immediate notification to the insurer.\n- THRESHOLD means the insured's policy automatically covers newly acquired entities only if they fall below a certain threshold percentage. This percentage usually refers to the total assets, revenue, or employee count of the acquired entity compared to the insured's existing operations.\n- PREDETERMINED_RATES establishes specific premium rates in advance that will apply to newly acquired entities. This allows the insured to understand the additional premium costs that will result from acquisitions.\n\nIf THRESHOLD is selected, \"thresholdPercentage\" field is required (value must be a percentage like X%), otherwise leave it empty.\n\nIf PREDETERMINED_RATES is selected, \"PredeterminedRates\" field is required, otherwise leave it empty.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "acquisitionThreshold": {
+                    "type": "string",
+                    "enum": [
+                        "AUTOMATIC_COVERAGE",
+                        "THRESHOLD",
+                        "PREDETERMINED_RATES"
+                    ]
+                },
+                "thresholdPercentage": {
+                    "type": "string"
+                },
+                "predeterminedRates": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Broad form named insurance",
+        "Line item instruction": "[Broad form named insurance]\nDefinition:\nCheck the definition of \"the insured\" in the policy, if the definition of the insured is broad and does not restrict to a list of individual names, it is considered ANY_NAMED_INSURED.\n\nParameter Assignment:\n- appliesTo: If the insured is restricted to a list of individual insured names, select \"OTHER\". Otherwise select ANY_NAMED_INSURED.\n- isoForm: always leave this empty\n\nOutput Rules:\n- If there is no replated information found: Output null\n- If this is relevant info, output according to Parameter Assignment",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "isoForm": {
+                    "type": "string",
+                    "enum": [
+                        "CARRIER_FORM"
+                    ]
+                },
+                "appliesTo": {
+                    "type": "string",
+                    "enum": [
+                        "ANY_NAMED_INSURED",
+                        "OTHER"
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Claim reporting window extended",
+        "Line item instruction": "Definition:\nThe additional time for reporting a claim or providing notice of a claim after the policy expiration or the end of the policy period.\n\nCoverage Requirements:\n- This typically exists in the policy's notification section, find the deadline that the insured is required to provide notice of claim.\n- reporting, providing notice, and discovery of a claim all have the same meaning and are considered \"reporting a claim\"\n- This may also be known as a basic extended reporting period or automatic extended reporting period.\n\nNot Applicable:\n- Do not use the extended reporting period that requires X% of premium, because this needs to be purchased with additional premium.\n\nParameter Assignment:\n- numberOfDays: find the additional time in the number of days.\n\nOutput Rules:\n- If there is no such information found: Output null\n- If this is relevant info, output according to Parameter Assignment\n- Pay attention to endorsements that may change the values of the parameters.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "numberOfDays": {
+                    "type": "number"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Media liability coverage - 3rd party limit",
+        "Line item instruction": "This coverage item pays for 3rd party claims alleging harm from your media content (e.g., defamation).\n\nIf this item is included in the policy, find out exactly which policy coverage contains or corresponds to this item, and use this policy coverage's spec to fill the parameters for this item.",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "coverage": {
+                    "type": "string",
+                    "enum": [
+                        "EXCLUDED",
+                        "INCLUDED",
+                        "NOT_COVERED"
+                    ]
+                },
+                "limit": {
+                    "type": "object",
+                    "required": [
+                        "currencyCode",
+                        "units",
+                        "nanos"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "currencyCode": {
+                            "type": "string",
+                            "description": "The currency code for the amount",
+                            "enum": [
+                                "USD"
+                            ]
+                        },
+                        "units": {
+                            "type": "integer",
+                            "description": "The whole number amount (e.g., 1000000 for $1,000,000)"
+                        },
+                        "nanos": {
+                            "type": "integer",
+                            "description": "The fractional amount in billionths (for cents representation)"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Notice of Cancellation",
+        "Line item instruction": "[Notice of Cancellation]\nDefinition:\nThe insure is required to provide notice of cancellation X days before the policy expiration. Typically the policy would specify the number of days for non-payment of premium, and the number of days for other reasons.\n\nParameter Assignment:\n- applies: always select \"OTHER\"\n- other: provide the policy's terms for notice of cancellation. Try to find the number of days the insurer must provide written notice prior to cancellation for non-payment, as well as for other reasons.\n\nOutput Rules:\n- If there is no such information found: Output null\n- If this is relevant info, output according to Parameter Assignment",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "applies": {
+                    "type": "string",
+                    "enum": [
+                        "THIRTY_DAYS",
+                        "SIXTY_DAYS",
+                        "NINETY_DAYS",
+                        "OTHER"
+                    ]
+                },
+                "other": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Notice of Cancellation to Third Party / Certificate Holder",
+        "Line item instruction": "This endorsement extends the insurance company's responsibility to notify certain third parties when the insured's insurance policy is being cancelled. Normally, the insurance company is only required to notify the insured of policy cancellation, but this endorsement creates an additional obligation to notify specified third parties.\nHere are the fields: \nappliesTo: Determines which third parties will receive cancellation notices\n    - \"ENTITY_YOU_HAVE_A_CONTRACT_WITH\" - Specific entities with whom the insured has a contractual relationship\n    - \"WHERE_REQUIRED_BY_WRITTEN_CONTRACT\" (shown as \"Blanket - Where Required By Written Contract\") - Automatically applies to all third parties where the insured's written contract requires such notice, without having to individually list each third party\n\nWhen \"ENTITY_YOU_HAVE_A_CONTRACT_WITH\" is selected, you will need to fill in the following fields:\n- entityContractName: The name of the specific third-party entity\n- entityContractAddress: The address where notifications should be sent\n\nIf there is no clear evidence for this endorsement, output null.\nIf the document sections do not mention third party, consider this as no clear evidence and output null",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "appliesTo": {
+                    "type": "string",
+                    "enum": [
+                        "ENTITY_YOU_HAVE_A_CONTRACT_WITH",
+                        "WHERE_REQUIRED_BY_WRITTEN_CONTRACT"
+                    ]
+                },
+                "entityContractName": {
+                    "type": "string"
+                },
+                "entityContractAddress": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    {
+        "Line item name": "Softened cooperation hammer clause",
+        "Line item instruction": "[Softened cooperation hammer clause]\nDefinition:\nWhen the insured and insurer disagree about settling a claim, and the insured refuses a settlement the insurer recommends, the percentage the insurer will cover the excessive cost.\n\nParameter Assignment:\n- type: if the insurer covers 80% of the excessive cost, then select EIGHTY_TWENTY. If the percentage is other than 80%, select OTHER.\n- description: if the percentage is not 80%, specify the percentage.\n\nOutput Rules:\n- If there is no such information found: Output null\n- If this is relevant info, output according to Parameter Assignment",
+        "Line item schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "clause": {
+                    "type": "string",
+                    "enum": [
+                        "EIGHTY_TWENTY",
+                        "OTHER"
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+]
